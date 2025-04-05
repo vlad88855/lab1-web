@@ -3,12 +3,64 @@
  */
 package schoollab;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.JAXBException;
+
+import java.io.File;
+
 public class App {
     public String getGreeting() {
-        return "Hello World!";
+        return "Hello World";
     }
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        School school = new School();
+
+        school.AddSubject("Math");
+        Student student1 = school.AddStudent("Vlad", "Shynkaruk");
+        Student student2 = school.AddStudent("Vlad", "Panasuyk8");
+
+        student1.WriteTest("Math", 3);
+        student1.WriteTest("Math", 6);
+
+        student2.WriteTest("Math", 10);
+        student2.WriteTest("Math", 11);
+        student2.WriteTest("Math", 6);
+        System.out.println(student1.GetPerfomance());
+        System.out.println(student2.GetPerfomance());
+
+        System.out.println(school.GetPerfomance());
+
+        student1.PrintMarks();
+        student2.PrintMarks();
+        // school.AddSubject("Biology");
+
+        school.AddSubject("Biology");
+        student1.WriteTest("Biology", 5);
+        student1.WriteTest("Biology", 10);
+        student2.WriteTest("Biology", 1);
+        student2.WriteTest("Biology", 0);
+
+        student2.RemoveMark("Biology", 1);
+
+        student1.PrintMarks();
+        student2.PrintMarks();
+
+        System.out.println(school.GetPerfomance());
+        // school.WriteTest(null);
+        school.PrintStudents();
+        // school.AddStudent(null, null);
+        try {
+            JAXBContext context = JAXBContext.newInstance(School.class);
+            Marshaller marshaller = context.createMarshaller();
+            marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            File file = new File("school.xml");
+            marshaller.marshal(school, file);
+            System.out.println("Marshalling complete! Check school.xml for the output.");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

@@ -6,9 +6,51 @@ package schoollab;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.BeforeEach;
+
 class AppTest {
-    @Test void appHasAGreeting() {
+    private School school;
+
+    @BeforeEach
+    void SetUp() {
+        school = new School();
+        school.AddStudent("Vladyslav", "Shynkaruk");
+        school.AddStudent("Vladyslav", "Panasyuk");
+        school.AddSubject("Math");
+    }
+
+    @Test
+    void testCRUDStudent() {
+        var student = school.AddStudent("Vladyslav", "Brazhnyk");
+        assertEquals(student, school.GetStudentById(2));
+        assertThrows(IllegalArgumentException.class, () -> school.GetStudentById(3));
+        school.RemoveStudent(1);
+        assertThrows(IllegalArgumentException.class, () -> school.GetStudentById(1));
+        school.UpdateStudentName(0, "Shynkaruk", "Vladyslav");
+        assertEquals("Shynkaruk", school.GetStudentById(0).name);
+        assertEquals("Vladyslav", school.GetStudentById(0).lastName);
+    }
+
+    @Test
+    void testCRUDExceptionsStudent() {
+
+    }
+
+    @Test
+    void testGetPerfomanceStudent() {
+
+        assertThrows(IllegalArgumentException.class, () -> school.RemoveStudent(1));
+    }
+
+    @Test
+    void testPerfomance() {
+
+    }
+
+    @Test
+    void appHasAGreeting() {
         App classUnderTest = new App();
         assertNotNull(classUnderTest.getGreeting(), "app should have a greeting");
     }
+
 }
