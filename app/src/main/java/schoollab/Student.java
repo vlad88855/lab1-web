@@ -23,15 +23,23 @@ public class Student {
     return id;
   }
 
-  public String GetName() {
+  public String getName() {
     return name;
   }
 
-  public String GetLastName() {
+  public void setName(String Name) {
+    name = Name;
+  }
+
+  public String getLastName() {
     return lastName;
   }
 
-  public List<Subject> GetSubjects() {
+  public void setLastName(String LastName) {
+    lastName = LastName;
+  }
+
+  public List<Subject> getSubjects() {
     return subjects;
   }
 

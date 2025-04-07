@@ -1,6 +1,7 @@
 package schoollab;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.Objects;
@@ -24,19 +25,14 @@ public class School {
   }
 
   public Student AddStudent(String Name, String LastName) {
-    try {
-      var student = new Student(Name, LastName, studentIdCounter);
-      student.subjects = new ArrayList<>();
-      for (Subject subject : subjects) {
-        student.subjects.add(new Subject(subject.name));
-      }
-      students.add(student);
-      studentIdCounter++;
-      return student;
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
-      return null;
+    var student = new Student(Name, LastName, studentIdCounter);
+    student.subjects = new ArrayList<>();
+    for (Subject subject : subjects) {
+      student.subjects.add(new Subject(subject.name));
     }
+    students.add(student);
+    studentIdCounter++;
+    return student;
   }
 
   public Student GetStudentById(int id) {
@@ -49,23 +45,21 @@ public class School {
   }
 
   public void UpdateStudentName(int id, String newName, String newLastName) {
-    try {
-      Student student = GetStudentById(id);
-      student.name = newName;
-      student.lastName = newLastName;
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
+    if (newName == null || newLastName == null) {
+      throw new IllegalArgumentException("Name can't be null");
     }
+    Student student = GetStudentById(id);
+    student.setName(newName);
+    student.setLastName(newLastName);
     // Student student = GetStudentById(id);
   }
 
+  // System.out.println("Can't remove student with that id. Student wasn't
+  // found");
   public void RemoveStudent(int id) {
-    try {
-      Student student = GetStudentById(id);
-      students.remove(student);
-    } catch (IllegalArgumentException e) {
-      System.out.println("Can't remove student with that id. Student wasn't found");
-    }
+    Student student = GetStudentById(id);
+    students.remove(student);
+
   }
 
   // for safety returns copy and not pointer to main list
@@ -74,6 +68,11 @@ public class School {
   }
 
   public void AddSubject(String Name) {
+    for (Subject subject : subjects) {
+      if (Name == subject.name) {
+        throw new IllegalArgumentException("There is already this subject");
+      }
+    }
     subjects.add(new Subject(Name));
     for (Student student : students) {
       Subject subject = new Subject(Name);
@@ -91,18 +90,19 @@ public class School {
   }
 
   public void RemoveSubject(String Name) {
-    try {
-      Subject subject = GetSubject(Name);
-      subjects.remove(subject);
-      for (Student student : students) {
-        student.subjects.remove(student.GetSubject(Name));
-      }
-    } catch (IllegalArgumentException e) {
-      System.out.println(e.getMessage());
+    Subject subject = GetSubject(Name);
+    subjects.remove(subject);
+    for (Student student : students) {
+      student.subjects.remove(student.GetSubject(Name));
     }
   }
 
   public void UpdateSubject(String Name, String newName) {
+    for (Subject subject : subjects) {
+      if (Name == subject.name) {
+        throw new IllegalArgumentException("There is already subject with that name");
+      }
+    }
     Subject subject = GetSubject(Name);
     subject.name = newName;
     for (Student student : students) {
@@ -117,38 +117,55 @@ public class School {
   }
 
   public double GetPerfomance() {
-    try {
-      double sum = 0, studentCount = 0;
-      if (!students.isEmpty()) {
-        for (Student student : students) {
-          double perfomance = student.GetPerfomance();
-          if (perfomance != -1) {
-            sum += perfomance;
-            studentCount++;
-          }
+    double sum = 0, studentCount = 0;
+    if (!students.isEmpty()) {
+      for (Student student : students) {
+        double perfomance = student.GetPerfomance();
+        if (perfomance != -1) {
+          sum += perfomance;
+          studentCount++;
         }
-        if (studentCount != 0) {
-          return sum /= studentCount;
-        }
-        System.out.println("There is no marks of students in that School yet");
-        return -1;
-      } else {
-        System.out.println("There is no students in that School yet");
-        return -1;
       }
-    } catch (IllegalArgumentException e) {
-      System.out.println("Couldn't calculate perfomance." + e.getMessage());
-      return -1;
+      if (studentCount != 0) {
+        return sum /= studentCount;
+      }
+      throw new IllegalArgumentException("There is no marks of students in that School yet");
+    } else {
+      throw new IllegalArgumentException("There is no students in that School yet");
     }
   }
 
   public void PrintStudents() {
     for (Student student : students) {
-      System.out.println(student.getId() + "  " + student.lastName + "  " + student.name);
+      System.out.println(student.getId() + "  " + student.getLastName() + "  " + student.getName());
     }
   }
 
   // TODO export and import
+
+  public enum SortOption {
+    LAST_NAME,
+    STUDENT_ID,
+    PERFORMANCE
+  }
+
+  public List<Student> getSortedStudents(SortOption sortOption) {
+    List<Student> sortedStudents = new ArrayList<>(students);
+    switch (sortOption) {
+      case LAST_NAME:
+        sortedStudents.sort(Comparator.comparing(Student::getLastName));
+        break;
+      case STUDENT_ID:
+        sortedStudents.sort(Comparator.comparingInt(Student::getId));
+        break;
+      case PERFORMANCE:
+        sortedStudents.sort(Comparator.comparingDouble(Student::GetPerfomance));
+        break;
+      default:
+        break;
+    }
+    return sortedStudents;
+  }
 
   @Override
   public boolean equals(Object o) {

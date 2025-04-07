@@ -23,34 +23,97 @@ class AppTest {
     void testCRUDStudent() {
         var student = school.AddStudent("Vladyslav", "Brazhnyk");
         assertEquals(student, school.GetStudentById(2));
-        assertThrows(IllegalArgumentException.class, () -> school.GetStudentById(3));
         school.RemoveStudent(1);
         assertThrows(IllegalArgumentException.class, () -> school.GetStudentById(1));
         school.UpdateStudentName(0, "Shynkaruk", "Vladyslav");
-        assertEquals("Shynkaruk", school.GetStudentById(0).name);
-        assertEquals("Vladyslav", school.GetStudentById(0).lastName);
+        assertEquals("Shynkaruk", school.GetStudentById(0).getName());
+        assertEquals("Vladyslav", school.GetStudentById(0).getLastName());
     }
 
     @Test
     void testCRUDExceptionsStudent() {
+        assertThrows(IllegalArgumentException.class, () -> school.AddStudent(null, "Brazhnyk"));
+        assertThrows(IllegalArgumentException.class, () -> school.GetStudentById(3));
+        assertThrows(IllegalArgumentException.class, () -> school.RemoveStudent(4));
+        assertThrows(IllegalArgumentException.class, () -> school.UpdateStudentName(1, null, null));
+        assertThrows(IllegalArgumentException.class, () -> school.UpdateStudentName(4, "Vladyslav", "Vladyslav"));
+    }
+
+    @Test
+    void testCRUDSubjects() {
+        school.AddSubject("History");
+        Subject subject = school.GetSubject("History");
+        assertEquals("History", subject.name);
+        school.UpdateSubject("History", "Geography");
+        Subject updatedSubject = school.GetSubject("Geography");
+        assertEquals("Geography", updatedSubject.name);
+        school.RemoveSubject("Geography");
+        assertThrows(IllegalArgumentException.class, () -> school.GetSubject("Geography"));
+    }
+
+    @Test
+    void testCRUDSubjectsExceptions() {
+        assertThrows(IllegalArgumentException.class, () -> school.GetSubject("Biology"));
+        assertThrows(IllegalArgumentException.class, () -> school.RemoveSubject("Biology"));
+        assertThrows(IllegalArgumentException.class, () -> school.UpdateSubject("Chemistry", "Math"));
+    }
+
+    @Test
+    void testMarksInSubjects() {
+        var student1 = school.GetStudentById(0);
+        student1.GetSubject("Math").AddMark(2);
+        student1.GetSubject("Math").AddMark(7);
+        assertEquals(2, student1.subjects.get(0).marks.get(0));
+        student1.subjects.get(0).AddMark(2);
+        assertEquals(2, student1.subjects.get(0).marks.get(2));
+        student1.subjects.get(0).RemoveMark(2);
+        assertEquals(2, student1.subjects.get(0).marks.get(0));
+        assertThrows(IndexOutOfBoundsException.class, () -> student1.subjects.get(0).marks.get(2));
+        assertThrows(IllegalArgumentException.class, () -> student1.GetSubject("Biology").AddMark(2));
+        assertThrows(IllegalArgumentException.class, () -> student1.GetSubject("Math").AddMark(-1));
 
     }
 
     @Test
     void testGetPerfomanceStudent() {
-
-        assertThrows(IllegalArgumentException.class, () -> school.RemoveStudent(1));
+        var student1 = school.GetStudentById(0);
+        var student2 = school.GetStudentById(1);
+        student2.WriteTest("Math", 9);
+        student1.WriteTest("Math", 4);
+        student1.WriteTest("Math", 0);
+        student1.WriteTest("Math", 7);
+        assertEquals((double) 11 / 3, student1.GetPerfomance());
+        assertEquals(9, student2.GetPerfomance());
     }
 
     @Test
-    void testPerfomance() {
-
+    void testGetPerfomanceStudentExceptions() {
+        var student1 = school.GetStudentById(1);
+        assertThrows(IllegalArgumentException.class, () -> student1.WriteTest("Biology", 9));
+        assertThrows(IllegalArgumentException.class, () -> student1.WriteTest(null, 9));
+        assertThrows(IllegalArgumentException.class, () -> student1.WriteTest("Math", -49));
     }
 
     @Test
-    void appHasAGreeting() {
-        App classUnderTest = new App();
-        assertNotNull(classUnderTest.getGreeting(), "app should have a greeting");
+    void testGetPerfomanceSchool() {
+        var student1 = school.GetStudentById(0);
+        var student2 = school.GetStudentById(1);
+        student2.WriteTest("Math", 9);
+        student1.WriteTest("Math", 4);
+        student1.WriteTest("Math", 0);
+        student1.WriteTest("Math", 7);
+        assertEquals((double) ((double) 11 / 3 + 9) / 2, school.GetPerfomance());
     }
 
+    @Test
+    void testGetPerfomanceSchoolExceptions() {
+        School school1 = new School();
+        assertThrows(IllegalArgumentException.class, () -> school1.GetPerfomance());
+        assertThrows(IllegalArgumentException.class, () -> school.GetPerfomance());
+    }
+
+    @Test
+    void testImportingData() {
+
+    }
 }
